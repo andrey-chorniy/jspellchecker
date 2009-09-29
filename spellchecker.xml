@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="spellchecker" default="all">
+  
+  
+  <property file="spellchecker.properties"/>
+  <!-- Uncomment the following property if no tests compilation is needed -->
+  <!-- 
+  <property name="skip.tests" value="true"/>
+   -->
+  
+  <!-- Compiler options -->
+  
+  <property name="compiler.debug" value="on"/>
+  <property name="compiler.generate.no.warnings" value="off"/>
+  <property name="compiler.args" value=""/>
+  <property name="compiler.max.memory" value="128m"/>
+  <patternset id="ignored.files">
+    <exclude name="**/CVS/**"/>
+    <exclude name="**/SCCS/**"/>
+    <exclude name="**/RCS/**"/>
+    <exclude name="**/rcs/**"/>
+    <exclude name="**/.DS_Store/**"/>
+    <exclude name="**/.svn/**"/>
+    <exclude name="**/.pyc/**"/>
+    <exclude name="**/.pyo/**"/>
+    <exclude name="**/*.pyc/**"/>
+    <exclude name="**/*.pyo/**"/>
+    <exclude name="**/.git/**"/>
+    <exclude name="**/.sbas/**"/>
+    <exclude name="**/.IJI.*/**"/>
+    <exclude name="**/vssver.scc/**"/>
+    <exclude name="**/vssver2.scc/**"/>
+  </patternset>
+  <patternset id="library.patterns">
+    <include name="*.zip"/>
+    <include name="*.war"/>
+    <include name="*.egg"/>
+    <include name="*.ear"/>
+    <include name="*.swc"/>
+    <include name="*.jar"/>
+  </patternset>
+  <patternset id="compiler.resources">
+    <include name="**/?*.properties"/>
+    <include name="**/?*.xml"/>
+    <include name="**/?*.gif"/>
+    <include name="**/?*.png"/>
+    <include name="**/?*.jpeg"/>
+    <include name="**/?*.jpg"/>
+    <include name="**/?*.html"/>
+    <include name="**/?*.dtd"/>
+    <include name="**/?*.tld"/>
+    <include name="**/?*.ftl"/>
+  </patternset>
+  
+  
+  <!-- Project Libraries -->
+  
+  <path id="library.lib.classpath">
+    <pathelement location="${basedir}/tinymce-spellchecker/web/WEB-INF/lib/backport-util-concurrent-3.0.jar"/>
+    <pathelement location="${basedir}/tinymce-spellchecker/web/WEB-INF/lib/commons-logging-1.1.jar"/>
+    <pathelement location="${basedir}/tinymce-spellchecker/web/WEB-INF/lib/ehcache-1.4.0.jar"/>
+    <pathelement location="${basedir}/tinymce-spellchecker/web/WEB-INF/lib/jazzy-core.jar"/>
+    <pathelement location="${basedir}/tinymce-spellchecker/web/WEB-INF/lib/json.jar"/>
+  </path>
+  
+  
+  <!-- Global Libraries -->
+  
+  
+  <!-- Application Server Libraries -->
+  
+  <!-- Modules -->
+  
+  
+  <!-- Module Tinymce-spellchecker -->
+  
+  <dirname property="module.tinymce-spellchecker.basedir" file="${ant.file}"/>
+  
+  
+  
+  <property name="compiler.args.tinymce-spellchecker" value="${compiler.args}"/>
+  
+  <property name="tinymce-spellchecker.output.dir" value="${module.tinymce-spellchecker.basedir}/out/production/Tinymce-spellchecker"/>
+  <property name="tinymce-spellchecker.testoutput.dir" value="${module.tinymce-spellchecker.basedir}/out/test/Tinymce-spellchecker"/>
+  
+  <path id="tinymce-spellchecker.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="tinymce-spellchecker.module.classpath">
+    <path refid="library.lib.classpath"/>
+    <pathelement location="${basedir}/tinymce-spellchecker/dev-lib/servlet-api.jar"/>
+  </path>
+  
+  <path id="tinymce-spellchecker.runtime.module.classpath">
+    <pathelement location="${tinymce-spellchecker.output.dir}"/>
+    <pathelement location="${tinymce-spellchecker.testoutput.dir}"/>
+    <path refid="library.lib.classpath"/>
+    <pathelement location="${basedir}/tinymce-spellchecker/dev-lib/servlet-api.jar"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.tinymce-spellchecker">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.tinymce-spellchecker">
+    <patternset refid="excluded.from.module.tinymce-spellchecker"/>
+  </patternset>
+  
+  <path id="tinymce-spellchecker.module.sourcepath">
+    <dirset dir="${module.tinymce-spellchecker.basedir}/tinymce-spellchecker">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.tinymce-spellchecker" depends="compile.module.tinymce-spellchecker.production,compile.module.tinymce-spellchecker.tests" description="Compile module Tinymce-spellchecker"/>
+  
+  <target name="compile.module.tinymce-spellchecker.production" description="Compile module Tinymce-spellchecker; production classes">
+    <mkdir dir="${tinymce-spellchecker.output.dir}"/>
+    <javac destdir="${tinymce-spellchecker.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
+      <compilerarg line="${compiler.args.tinymce-spellchecker}"/>
+      <bootclasspath refid="tinymce-spellchecker.module.bootclasspath"/>
+      <classpath refid="tinymce-spellchecker.module.classpath"/>
+      <src refid="tinymce-spellchecker.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.tinymce-spellchecker"/>
+    </javac>
+    
+    <copy todir="${tinymce-spellchecker.output.dir}">
+      <fileset dir="${module.tinymce-spellchecker.basedir}/tinymce-spellchecker/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.tinymce-spellchecker.tests" depends="compile.module.tinymce-spellchecker.production" description="compile module Tinymce-spellchecker; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.tinymce-spellchecker" description="cleanup module">
+    <delete dir="${tinymce-spellchecker.output.dir}"/>
+    <delete dir="${tinymce-spellchecker.testoutput.dir}"/>
+  </target>
+  
+  <property name="tinymce-spellcheckerweb.path.jar" value="${module.tinymce-spellchecker.basedir}/out/spellchecker.war"/>
+  <target name="j2ee.build.tinymce-spellcheckerweb" depends="compile.module.tinymce-spellchecker" description="Build configured Java EE directories and archives for facet &apos;Web&apos;">
+    <antcall target="j2ee.build.jar.tinymce-spellcheckerweb">
+      <param name="j2ee.path.jar" value="${tinymce-spellcheckerweb.path.jar}"/>
+    </antcall>
+  </target>
+  
+  <!-- Call the target to build exploded directory for facet 'Web'.
+       Path to the exploded directory is specified by parameter 'j2ee.dir.exploded' -->
+  <target name="j2ee.build.exploded.tinymce-spellcheckerweb" description="Build exploded directory for facet &apos;Web&apos;">
+    <copy file="${module.tinymce-spellchecker.basedir}/tinymce-spellchecker/web/WEB-INF/web.xml" tofile="${j2ee.dir.exploded}/WEB-INF/web.xml"/>
+    <copy todir="${j2ee.dir.exploded}/WEB-INF/classes">
+      <fileset dir="${module.tinymce-spellchecker.basedir}/out/production/Tinymce-spellchecker"/>
+    </copy>
+    <copy todir="${j2ee.dir.exploded}/">
+      <fileset dir="${module.tinymce-spellchecker.basedir}/tinymce-spellchecker/web"/>
+    </copy>
+  </target>
+  
+  <!-- Call the target to build war archive for facet 'Web'.
+       Path to the archive file is specified by parameter 'j2ee.path.jar' -->
+  <target name="j2ee.build.jar.tinymce-spellcheckerweb" description="Build Java EE archive for facet &apos;Web&apos;">
+    <dirname property="jar.dir" file="${j2ee.path.jar}"/>
+    <mkdir dir="${jar.dir}"/>
+    <jar destfile="${j2ee.path.jar}" duplicate="preserve">
+      <manifest>
+        <attribute name="Created-By" value="IntelliJ IDEA"/>
+        <attribute name="Manifest-Version" value="1.0"/>
+      </manifest>
+      <zipfileset dir="${module.tinymce-spellchecker.basedir}/tinymce-spellchecker/web" prefix=""/>
+      <zipfileset dir="${module.tinymce-spellchecker.basedir}/out/production/Tinymce-spellchecker" prefix="WEB-INF/classes"/>
+      <zipfileset file="${module.tinymce-spellchecker.basedir}/tinymce-spellchecker/web/WEB-INF/web.xml" prefix="WEB-INF"/>
+    </jar>
+  </target>
+  
+  <target name="init" description="Build initialization">
+    <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.module.tinymce-spellchecker" description="cleanup all"/>
+  
+  <target name="all" depends="init, clean, j2ee.build.tinymce-spellcheckerweb" description="build all"/>
+</project>

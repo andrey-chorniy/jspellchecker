@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/tinymce-spellchecker/web/WEB-INF/lib/commons-logging-1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/tinymce-spellchecker/web/WEB-INF/lib/jazzy-core.jar!/" />
+      <root url="jar://$PROJECT_DIR$/tinymce-spellchecker/web/WEB-INF/lib/json.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
