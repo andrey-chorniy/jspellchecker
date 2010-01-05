@@ -9,24 +9,34 @@
     <!--Google service based SpellChecker-->
     <servlet>
         <description>A spell checking servlet that accepts JSON requests and processes them using Jazzy</description>
-        <servlet-name>google-spellcheck</servlet-name>
+        <servlet-name>google-spellchecker</servlet-name>
         <servlet-class>org.tinymce.spellchecker.GoogleSpellChekerServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>google-spellcheck</servlet-name>
-        <url-pattern>/google-spell-check</url-pattern>
+        <servlet-name>google-spellchecker</servlet-name>
+        <url-pattern>/google-spellchecker</url-pattern>
     </servlet-mapping>
 
     <!--Jazzy SpellChecker-->
     <servlet>
         <description>A spell checking servlet that accepts JSON requests and processes them using Jazzy</description>
-        <servlet-name>jazzy-spellcheck</servlet-name>
+        <servlet-name>jazzy-spellchecker</servlet-name>
         <servlet-class>org.tinymce.spellchecker.JazzySpellCheckerServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>jazzy-spellcheck</servlet-name>
-        <url-pattern>/jazzy-spell-check</url-pattern>
+        <servlet-name>jazzy-spellchecker</servlet-name>
+        <url-pattern>/jazzy-spellchecker</url-pattern>
     </servlet-mapping>
 
+    <!--JMySpell SpellChecker-->
+    <servlet>
+        <description>A spell checking servlet that accepts JSON requests and processes them using JMySpell</description>
+        <servlet-name>jmyspell-spellchecker</servlet-name>
+        <servlet-class>org.tinymce.spellchecker.JMySpellCheckerServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>jmyspell-spellchecker</servlet-name>
+        <url-pattern>/jmyspell-spellchecker</url-pattern>
+    </servlet-mapping>
 
 </web-app>
