@@ -56,11 +56,7 @@
   <!-- Project Libraries -->
   
   <path id="library.lib.classpath">
-    <pathelement location="${basedir}/tinymce-spellchecker/web/WEB-INF/lib/backport-util-concurrent-3.0.jar"/>
-    <pathelement location="${basedir}/tinymce-spellchecker/web/WEB-INF/lib/commons-logging-1.1.jar"/>
-    <pathelement location="${basedir}/tinymce-spellchecker/web/WEB-INF/lib/ehcache-1.4.0.jar"/>
-    <pathelement location="${basedir}/tinymce-spellchecker/web/WEB-INF/lib/jazzy-core.jar"/>
-    <pathelement location="${basedir}/tinymce-spellchecker/web/WEB-INF/lib/json.jar"/>
+      <fileset dir="${basedir}/tinymce-spellchecker/web/WEB-INF/lib" includes="**/*.jar"/>
   </path>
   
   
