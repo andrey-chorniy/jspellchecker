@@ -120,9 +120,11 @@ public class LuceneSpellCheckerServlet extends TinyMCESpellCheckerServlet {
     }
 
     /**
-     * This method look for the already created SpellChecker object in the cache, if it is not present in the cache then
-     * it try to load it and put newly created object in the cache. SpellChecker loading is quite expensive operation
-     * to do it for every spell-checking request, so in-memory-caching here is almost a "MUST to have"
+     * This method use 2-level cache to achieve the maximum performance and memory-management.
+     * 1-st level of the cache is the cache of SpellCheckers which use In-Memory (RAMDirectory) Lucene indexes<br/>
+     * 2-nd level cache store File-System SpellCheckers (FSDirectory) which don't take memory but just hold the reference to the Directory object<br/>
+     * 1-st level cache implementation (LinkedHashMap) is also responsible for memory-management, it guarantees that summary
+     * size of all In-Memory indexes is less than maxMemoryUsage (in bytes)
      *
      * @param lang the language code like "en" or "en-us"
      * @return instance of Lucene SpellChecker
@@ -134,13 +136,17 @@ public class LuceneSpellCheckerServlet extends TinyMCESpellCheckerServlet {
         MemoryAwareSpellChecker cachedChecker = inMemorySpellcheckersCache.get(lang);
         if (cachedChecker == null){
             MemoryAwareSpellChecker diskSpellChecker = spellcheckersCache.get(lang);
-            diskSpellChecker = loadSpellChecker(lang);
-            spellcheckersCache.put(lang, diskSpellChecker);
+            if (diskSpellChecker == null){
+                diskSpellChecker = loadSpellChecker(lang);
+                spellcheckersCache.put(lang, diskSpellChecker);
+            }
+            
             try {
                 cachedChecker = new MemoryAwareSpellChecker(new RAMDirectory(diskSpellChecker.getSpellIndex()));
                 inMemorySpellcheckersCache.put(lang, cachedChecker);
             } catch (IOException e) {
-
+                logger.log(Level.SEVERE, "Failed to read index", e);
+                throw new SpellCheckException("Failed to read index", e);
             }
         }
 
