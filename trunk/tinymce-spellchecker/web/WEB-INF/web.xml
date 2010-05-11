@@ -39,4 +39,22 @@
         <url-pattern>/jmyspell-spellchecker</url-pattern>
     </servlet-mapping>
 
+    <!--Lucene SpellChecker-->
+    <servlet>
+        <description>A spell checking servlet that accepts JSON requests and processes them using Lucene Spellchecker</description>
+        <servlet-name>lucene-spellchecker</servlet-name>
+        <servlet-class>org.tinymce.spellchecker.LuceneSpellCheckerServlet</servlet-class>
+        <init-param>
+            <param-name>max_memory_usage</param-name>
+            <param-value>128</param-value>
+        </init-param>
+        <init-param>
+            <param-name>preloadedLanguages</param-name>
+            <param-value>en-us</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>lucene-spellchecker</servlet-name>
+        <url-pattern>/lucene-spellchecker</url-pattern>
+    </servlet-mapping>
 </web-app>
