@@ -86,12 +86,12 @@ public class JazzySpellCheckerServlet extends TinyMCESpellCheckerServlet {
      *                             dictionaries for that language was found in the classpath
      */
     protected Object getChecker(String lang) throws SpellCheckException {
-        SpellChecker cachedCheker = spellcheckersCache.get(lang);
-        if (cachedCheker == null) {
-            cachedCheker = loadSpellChecker(lang);
-            spellcheckersCache.put(lang, cachedCheker);
+        SpellChecker cachedChecker = spellcheckersCache.get(lang);
+        if (cachedChecker == null) {
+            cachedChecker = loadSpellChecker(lang);
+            spellcheckersCache.put(lang, cachedChecker);
         }
-        return cachedCheker;
+        return cachedChecker;
     }
 
     /**
