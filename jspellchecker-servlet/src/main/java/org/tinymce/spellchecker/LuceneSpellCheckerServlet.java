@@ -74,7 +74,6 @@ public class LuceneSpellCheckerServlet extends TinyMCESpellCheckerServlet {
             return size;
         }
     };
-    private static final String WEB_INF_DICTIONARY_LUCENE_DICTIONARIES = "/WEB-INF/dictionary/lucene";
 
     @Override
     public void init() throws ServletException {
@@ -218,18 +217,20 @@ public class LuceneSpellCheckerServlet extends TinyMCESpellCheckerServlet {
      */
 
     protected List<File> getDictionaryFiles(String language) throws SpellCheckException {
-        String pathToDictionaries = getServletContext().getRealPath(WEB_INF_DICTIONARY_LUCENE_DICTIONARIES);
-        File dictionariesDir = new File(pathToDictionaries);
-        List<File> langDictionaries = getDictionaryFiles(language, dictionariesDir, language);
+        File dictionariesDir =  ResourceProvider.getInstance().getDictionaryFile("lucene");
+        List<String> languages = SpellcheckerUtils.resolveLanguages(language);
+        //also add gobal
+        languages.add("global");
+
+        List<File> langDictionaries = new ArrayList<File>();
+        for (String lang : languages) {
+            langDictionaries.addAll(getDictionaryFiles(lang, dictionariesDir, lang));
+        }
         if (langDictionaries.size() == 0) {
             throw new SpellCheckException("There is no dictionaries for the language=" + language);
         }
-        List<File> globalDictionaries = getDictionaryFiles("global", dictionariesDir, "global");
 
-        List<File> dictionariesFiles = new ArrayList<File>();
-        dictionariesFiles.addAll(langDictionaries);
-        dictionariesFiles.addAll(globalDictionaries);
-        return dictionariesFiles;
+        return langDictionaries;
     }
 
 
