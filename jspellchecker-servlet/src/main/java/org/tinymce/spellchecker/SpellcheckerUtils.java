@@ -1,6 +1,7 @@
 package org.tinymce.spellchecker;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,14 +10,19 @@ import java.util.List;
  */
 public class SpellcheckerUtils {
 
-    public static List<String> resolveLanguages(String s) {
+    /**
+     * @param concreteLanguage language with sub-components delimited by dash "-"
+     * @return list of languages, starting from most concrete "en-us", followed by more generic "es"
+     */
+    public static List<String> resolveLanguages(String concreteLanguage) {
         List<String> result = new ArrayList<String>(3);
         StringBuilder langBuilder = new StringBuilder();
-        for (String part : s.split("-")) {
+        for (String part : concreteLanguage.split("-")) {
             langBuilder.append(part);
             result.add(langBuilder.toString());
             langBuilder.append("-");
         }
+        Collections.reverse(result);
         return result;
     }
 }

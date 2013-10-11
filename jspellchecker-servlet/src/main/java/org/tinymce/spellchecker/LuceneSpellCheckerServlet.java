@@ -267,8 +267,8 @@ public class LuceneSpellCheckerServlet extends TinyMCESpellCheckerServlet {
      * @throws IOException
      */
     private Directory getSpellCheckerDirectory(String language) throws IOException {
-        String path = "./spellchecker/lucene/" + language;
-        return FSDirectory.open(new File(path));
+        File indexDirectory = ResourceProvider.getInstance().getDictionaryFile("_work","lucene",language);
+        return FSDirectory.open(indexDirectory);
     }
 
     private class MemoryAwareSpellChecker extends SpellChecker{
@@ -279,6 +279,7 @@ public class LuceneSpellCheckerServlet extends TinyMCESpellCheckerServlet {
             _spellIndex = spellIndex;
         }
 
+        @SuppressWarnings("unused")
         private MemoryAwareSpellChecker(Directory spellIndex,
                                StringDistance sd) throws IOException {
             super(spellIndex, sd);
