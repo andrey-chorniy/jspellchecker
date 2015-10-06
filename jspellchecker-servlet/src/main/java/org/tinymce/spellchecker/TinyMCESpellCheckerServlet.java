@@ -31,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tinymce.spellchecker.util.StringUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -38,8 +39,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Andrey Chorniy
@@ -211,32 +215,44 @@ public abstract class TinyMCESpellCheckerServlet extends HttpServlet {
             throws ServletException, IOException {
         setResponeHeaders(response);
         try {
-            JSONObject jsonInput = readRequest(request);
 
-            String methodName = jsonInput.optString("method");
-            if (methodName == null || methodName.trim().equals("")) {
-                throw new SpellCheckException("Wrong spellchecker-method-name:" + methodName);
+            //——————————————————————————————-
+            //1. Retrieve values of the request parameters (method, text, lang).
+            //——————————————————————————————-
+            String methodName = request.getParameter("method");
+            if (!methodName.equals(SpellcheckMethod.spellcheck.name())) {
+                throw new SpellCheckException("Spellchecker method is not supported:" + methodName);
             }
 
+            String text = request.getParameter("text");
+            String lang = request.getParameter("lang");
+
+            logger.debug("methodName={} lang={}", methodName, lang);
+
+            //————————————————–
+            //2. Construct a list of words for spell checking.
+            //————————————————–
+            List <String>inputWords = constructWords(text);
 
             JSONObject jsonOutput = new JSONObject();
-            SpellcheckMethod method = SpellcheckMethod.valueOf(methodName.trim());
 
-            switch (method) {
-                case checkWords:
-                    jsonOutput.put("result", checkWords(jsonInput.optJSONArray("params")));
-                    break;
-                case getSuggestions:
-                    jsonOutput.put("result", getWordSuggestions(jsonInput.optJSONArray("params")));
-                    break;
-                case spellcheck:
-                    //This is TinyMCe 4.0
-                    jsonOutput.put("id", jsonInput.optString("id"));
-                    jsonOutput.put("result", getAllWordSuggestions(jsonInput.optJSONObject("params")));
-                    break;
-                default:
-                    throw new SpellCheckException("Spellchecker method not supported {" + methodName + "}");
+            //——————————————————————————-
+            //3. For each word, do a spell-check. If a word is misspelled, add suggestions.
+            //——————————————————————————-
+            List<String> misspelledWordsList = findMisspelledWords(inputWords.iterator(), lang);
+            JSONObject misspelledWordJSON = new JSONObject();
+
+            for(String misspelled : misspelledWordsList){
+                JSONArray suggestionJSONArray = getWordSuggestions(misspelled, lang);
+                misspelledWordJSON.put(misspelled, suggestionJSONArray);
             }
+
+            //————————————————–
+            //4. Construct JsonObject in the correct format.
+            //————————————————–
+            jsonOutput.put("words", misspelledWordJSON);
+
+            logger.debug("Response {}", jsonOutput);
 
             PrintWriter pw = response.getWriter();
             pw.println(jsonOutput.toString());
@@ -252,31 +268,6 @@ public abstract class TinyMCESpellCheckerServlet extends HttpServlet {
         response.getWriter().flush();
     }
 
-    private JSONObject getAllWordSuggestions(JSONObject params) throws SpellCheckException, JSONException {
-        JSONObject suggestions = new JSONObject();
-        JSONArray checkedWords = params.optJSONArray("words");
-        String lang = params.optString("lang");
-        lang = ("".equals(lang)) ? DEFAULT_LANGUAGE : lang;
-        List<String> misspelledWords = findMisspelledWords(new JsonArrayIterator(checkedWords), lang);
-        for (String misspelledWord : misspelledWords) {
-            List<String> suggestionsList = findSuggestions(misspelledWord, lang, maxSuggestionsCount);
-            suggestions.put(misspelledWord, suggestionsList);
-        }
-        return suggestions;
-    }
-
-    private JSONObject readRequest(HttpServletRequest request) throws SpellCheckException {
-        JSONObject jsonInput;
-        try {
-            jsonInput = new JSONObject(getRequestBody(request));
-        } catch (JSONException e) {
-            throw new SpellCheckException("Could not interpret JSON request body", e);
-        } catch (IOException e) {
-            throw new SpellCheckException("Error reading request body", e);
-        }
-        return jsonInput;
-    }
-
     /**
      * @param response response
      */
@@ -288,21 +279,6 @@ public abstract class TinyMCESpellCheckerServlet extends HttpServlet {
         response.setDateHeader("Expires", System.currentTimeMillis());
     }
 
-
-    /**
-     * @param request request
-     * @return read the request content and return it as String object
-     * @throws IOException
-     */
-    private String getRequestBody(HttpServletRequest request) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        String line = request.getReader().readLine();
-        while (null != line) {
-            sb.append(line);
-            line = request.getReader().readLine();
-        }
-        return sb.toString();
-    }
 
     /**
      * write error response as JSONObject to output
@@ -318,30 +294,23 @@ public abstract class TinyMCESpellCheckerServlet extends HttpServlet {
         }
     }
 
-    private JSONArray checkWords(JSONArray params) throws SpellCheckException {
-        JSONArray misspelledWords = new JSONArray();
-        if (params != null) {
-            JSONArray checkedWords = params.optJSONArray(1);
-            String lang = params.optString(0);
-            lang = ("".equals(lang)) ? DEFAULT_LANGUAGE : lang;
+    private List <String>constructWords(String text) {
+        List<String> words = new ArrayList<String>();
 
-            List<String> misspelledWordsList = findMisspelledWords(new JsonArrayIterator(checkedWords), lang);
-
-
-            for (String misspelledWord : misspelledWordsList) {
-                misspelledWords.put(misspelledWord);
+        if(StringUtils.isNotBlank(text)){
+            Pattern pattern = Pattern.compile("\\w+");
+            Matcher matcher = pattern.matcher(text.trim());
+            while (matcher.find()) {
+                String word = matcher.group();
+                words.add(word);
             }
-
         }
-        return misspelledWords;
+        return words;
     }
 
-    private JSONArray getWordSuggestions(JSONArray params) throws SpellCheckException {
+    private JSONArray getWordSuggestions(String word, String lang) throws SpellCheckException {
         JSONArray suggestions = new JSONArray();
-        if (params != null) {
-            String lang = params.optString(0);
-            lang = ("".equals(lang)) ? DEFAULT_LANGUAGE : lang;
-            String word = params.optString(1);
+        if (word != null) {
             List<String> suggestionsList = findSuggestions(word, lang, maxSuggestionsCount);
             for (String suggestion : suggestionsList) {
                 suggestions.put(suggestion);
@@ -349,8 +318,7 @@ public abstract class TinyMCESpellCheckerServlet extends HttpServlet {
         }
         return suggestions;
     }
-
-
+    
     protected abstract List<String> findMisspelledWords(Iterator<String> checkedWordsIterator,
                                                         String lang) throws SpellCheckException;
 
@@ -358,25 +326,5 @@ public abstract class TinyMCESpellCheckerServlet extends HttpServlet {
     protected abstract List<String> findSuggestions(String word, String lang,
                                                     int maxSuggestionsCount) throws SpellCheckException;
 
-    private static class JsonArrayIterator implements Iterator<String> {
-        private JSONArray array;
-        private int index = 0;
-
-        private JsonArrayIterator(JSONArray array) {
-            this.array = array;
-        }
-
-        public boolean hasNext() {
-            return index < array.length();
-        }
-
-        public String next() {
-            return array.optString(index++);
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-    }
 
 }
