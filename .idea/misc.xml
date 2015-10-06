@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project relativePaths="false" version="4">
-  <component name="DependencyValidationManager">
-    <option name="SKIP_IMPORT_STATEMENTS" value="false" />
+<project version="4">
+  <component name="EntryPointsManager">
+    <entry_points version="2.0" />
+  </component>
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="web" url="file://$PROJECT_DIR$/jspellchecker-servlet" />
+    <file type="web" url="file://$PROJECT_DIR$/jspellcheker-example" />
   </component>
   <component name="IdProvider" IDEtalkID="4222077B3C5C6AF184656CFC99E2F4F8" />
   <component name="JavadocGenerationManager">
@@ -20,6 +24,14 @@
     <option name="HEAP_SIZE" />
     <option name="LOCALE" />
     <option name="OPEN_IN_BROWSER" value="true" />
+  </component>
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/jspellchecker-servlet/pom.xml" />
+        <option value="$PROJECT_DIR$/jspellcheker-example/pom.xml" />
+      </list>
+    </option>
   </component>
   <component name="ProjectDetails">
     <option name="projectName" value="SpellChecker" />
@@ -43,4 +55,3 @@
   </component>
   <component name="WebServicesPlugin" addRequiredLibraries="true" />
 </project>
-
